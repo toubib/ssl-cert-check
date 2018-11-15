@@ -639,7 +639,12 @@ check_server_status() {
 
     if [ "${TLSSERVERNAME}" = "TRUE" ]
     then
-         TLSFLAG="${TLSFLAG} -servername $1"
+        if [ -n "${SERVERNAME}" ]
+        then
+            TLSFLAG="${TLSFLAG} -servername ${SERVERNAME}"
+        else
+            TLSFLAG="${TLSFLAG} -servername $1"
+        fi
     fi
 
     echo "" | ${OPENSSL} s_client -crlf ${VER} -connect ${1}:${2} ${TLSFLAG} 2> ${ERROR_TMP} 1> ${CERT_TMP}
@@ -799,7 +804,7 @@ check_file_status() {
 #################################
 ### Start of main program
 #################################
-while getopts abinNv:e:E:f:c:C:d:hk:p:s:t:qx:X:V option
+while getopts abinNv:e:E:f:c:C:d:hk:p:s:S:t:qx:X:V option
 do
     case "${option}"
     in
@@ -820,6 +825,7 @@ do
            NAGIOSSUMMARY="TRUE";;
         p) PORT=$OPTARG;;
         s) HOST=$OPTARG;;
+        S) SERVERNAME=$OPTARG;;
         t) CERTTYPE=$OPTARG;;
         q) QUIET="TRUE";;
         v) VERSION=$OPTARG;;
