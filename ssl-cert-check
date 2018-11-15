@@ -750,7 +750,12 @@ check_file_status() {
     CERTJULIAN=$(date2julian ${MONTH#0} ${2#0} ${4})
     CERTDIFF=$(date_diff ${NOWJULIAN} ${CERTJULIAN})
 
-    if [ ${CERTDIFF} -lt 0 ]
+    if [ -n "${REQUIRED_COMMONNAME}" -a "_${COMMONNAME}" != "_${REQUIRED_COMMONNAME}"  ]
+    then
+      prints ${HOST} ${PORT} "Bad CN (${COMMONNAME})" "${CERTDATE}" "${CERTDIFF}" "${CERTISSUER}" "${COMMONNAME}" "${SERIAL}"
+      RETCODE_LOCAL=2
+
+    elif [ ${CERTDIFF} -lt 0 ]
     then
         if [ "${ALARM}" = "TRUE" ]
         then
@@ -784,13 +789,14 @@ check_file_status() {
 #################################
 ### Start of main program
 #################################
-while getopts abinNv:e:E:f:c:d:hk:p:s:t:qx:V option
+while getopts abinNv:e:E:f:c:C:d:hk:p:s:t:qx:V option
 do
     case "${option}"
     in
         a) ALARM="TRUE";;
         b) NOHEADER="TRUE";;
         c) CERTFILE=${OPTARG};;
+        C) REQUIRED_COMMONNAME=${OPTARG};;
         d) CERTDIRECTORY=${OPTARG};;
         e) ADMIN=${OPTARG};;
 	E) SENDER=${OPTARG};;
