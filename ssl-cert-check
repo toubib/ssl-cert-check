@@ -717,7 +717,7 @@ check_file_status() {
 
         ### Grab the common name (CN) from the X.509 certificate
         COMMONNAME=$(${OPENSSL} x509 -in ${CERT_TMP} -subject -noout | \
-                   ${SED} -e 's/.*CN=//' | \
+                   ${SED} -e 's/.*CN[ ]*=[ ]*//' | \
                    ${SED} -e 's/\/.*//')
 
         ### Grab the serial number from the X.509 certificate
@@ -734,7 +734,7 @@ check_file_status() {
 
         ### Grab the common name (CN) from the X.509 certificate
         COMMONNAME=$(${OPENSSL} x509 -in ${CERTFILE} -subject -noout -inform ${CERTTYPE} | \
-                   ${SED} -e 's/.*CN=//' | \
+                   ${SED} -e 's/.*CN[ ]*=[ ]*//' | \
                    ${SED} -e 's/\/.*//')
 
         ### Grab the serial number from the X.509 certificate
