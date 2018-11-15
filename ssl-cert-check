@@ -233,6 +233,9 @@ SENDER="postmaster@localhost.localdomain"
 # Number of days in the warning threshhold (cmdline: -x)
 WARNDAYS=30
 
+# Number of days in the error threshhold  (cmdline: -X)
+ERRDAYS=0
+
 # If QUIET is set to TRUE, don't print anything on the console (cmdline: -q)
 QUIET="FALSE"
 
@@ -770,11 +773,18 @@ check_file_status() {
     then
         if [ "${ALARM}" = "TRUE" ]
         then
-            send_mail ${SENDER} ${ADMIN} "Certificate for ${HOST} \"(CN: ${COMMONNAME})\" will expire in ${WARNDAYS}-days or less" \
-                "The SSL certificate for ${HOST} \"(CN: ${COMMONNAME})\" will expire on ${CERTDATE}"
+            echo "The SSL certificate for ${HOST} \"(CN: ${COMMONNAME})\" will expire on ${CERTDATE}" \
+                 | ${MAIL} -s "Certificate for ${HOST} \"(CN: ${COMMONNAME})\" will expire in ${WARNDAYS}-days or less" ${ADMIN}
         fi
+
         prints ${HOST} ${PORT} "Expiring" "${CERTDATE}" "${CERTDIFF}" "${CERTISSUER}" "${COMMONNAME}" "${SERIAL}"
-        RETCODE_LOCAL=1
+
+        if [ ${CERTDIFF} -lt ${ERRDAYS} ]
+        then
+          RETCODE_LOCAL=2
+        else
+          RETCODE_LOCAL=1
+        fi
 
     else
         prints ${HOST} ${PORT} "Valid" "${CERTDATE}" "${CERTDIFF}" "${CERTISSUER}" "${COMMONNAME}" "${SERIAL}"
@@ -789,7 +799,7 @@ check_file_status() {
 #################################
 ### Start of main program
 #################################
-while getopts abinNv:e:E:f:c:C:d:hk:p:s:t:qx:V option
+while getopts abinNv:e:E:f:c:C:d:hk:p:s:t:qx:X:V option
 do
     case "${option}"
     in
@@ -815,6 +825,7 @@ do
         v) VERSION=$OPTARG;;
         V) VALIDATION="TRUE";;
         x) WARNDAYS=$OPTARG;;
+        X) ERRDAYS=$OPTARG;;
        \?) usage
            exit 1;;
     esac
